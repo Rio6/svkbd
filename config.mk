@@ -1,7 +1,7 @@
-LAYOUT = mobile-intl
+LAYOUT=me
 
 # paths
-PREFIX = /usr/local
+PREFIX=/home/rio/.local
 MANPREFIX = ${PREFIX}/share/man
 
 X11INC = /usr/X11R6/include
