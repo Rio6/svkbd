@@ -4,6 +4,13 @@ SVKBD: Simple Virtual Keyboard
 This is a simple virtual keyboard, intended to be used in environments,
 where no keyboard is available.
 
+Forked Features
+---------------------
+
+This fork adds the ability to swipe on keys to add shift, ctrl, alt, and super modifiers to the key (Only work if -R is not specified).
+
+There are also some of my own customizations.
+
 Installation
 ------------
 
