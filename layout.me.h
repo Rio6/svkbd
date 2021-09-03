@@ -73,10 +73,10 @@ static Key keys_en[KEYS] = {
 
     { "⇧", 0, XK_Shift_L, 1 },
     { "^", 0, XK_Control_L, 1 },
-    { "#", 0, XK_Super_L, 1 },
+    { "_", 0, XK_Alt_L, 1 },
     { "", 0, XK_space, 4},
     { "123", 0, XK_Mode_switch, 1},
-    { "_", 0, XK_Alt_L, 1 },
+    { "#", 0, XK_Super_L, 1 },
     { "↲", 0, XK_Return, 1 },
 };
 

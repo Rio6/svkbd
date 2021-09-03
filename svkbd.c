@@ -75,6 +75,7 @@ static void expose(XEvent *e);
 static Key *findkey(int x, int y);
 static void leavenotify(XEvent *e);
 static void press(Key *k, KeySym buttonmod);
+static void setmodkey(Key *k, Bool set);
 static double get_press_duration();
 static void run(void);
 static void setup(void);
@@ -176,28 +177,34 @@ motionnotify(XEvent *e)
 
 	if (lostfocus < 0 || gainedfocus < 0) return;
 
-	Key *shiftkey = NULL;
+	Key *shiftkey = NULL, *ctrlkey = NULL, *altkey = NULL, *superkey = NULL;
 	for (i = 0; i <numkeys; i++) {
-		if (keys[i].keysym == XK_Shift_L || keys[i].keysym == XK_Shift_R) {
+		if (!shiftkey && keys[i].keysym == XK_Shift_L || keys[i].keysym == XK_Shift_R)
 			shiftkey = &keys[i];
-			break;
-		}
+		if (!ctrlkey && keys[i].keysym == XK_Control_L || keys[i].keysym == XK_Control_R)
+			ctrlkey = &keys[i];
+		if (!altkey && keys[i].keysym == XK_Alt_L || keys[i].keysym == XK_Alt_R)
+			altkey = &keys[i];
+		if (!superkey && keys[i].keysym == XK_Super_L || keys[i].keysym == XK_Super_R)
+			superkey = &keys[i];
 	}
 
-	if (!shiftkey) return;
+	int dx = keys[gainedfocus].x - keys[lostfocus].x;
+	int dy = keys[gainedfocus].y - keys[lostfocus].y;
 
-	if (lostfocus == gainedfocus && shiftkey->pressed) {
-		printdbg("Unpressing shift\n");
-		shiftkey->pressed = False;
-		shiftkey->highlighted = False;
-		simulate_keyrelease(shiftkey->keysym);
-		drawkey(shiftkey, True);
-	} else if (lostfocus != gainedfocus && !shiftkey->pressed) {
-		printdbg("Pressing shift\n");
-		shiftkey->pressed = True;
-		shiftkey->highlighted = True;
-		simulate_keypress(shiftkey->keysym);
-		drawkey(shiftkey, True);
+	if (dx*dx < dy*dy && dy < 0) {
+		setmodkey(shiftkey, True);
+	} else if (dx*dx < dy*dy && dy > 0) {
+		setmodkey(ctrlkey, True);
+	} else if (dx*dx > dy*dy && dx < 0) {
+		setmodkey(superkey, True);
+	} else if (dx*dx > dy*dy && dx > 0) {
+		setmodkey(altkey, True);
+	} else {
+		Key *mods[] = { shiftkey, ctrlkey, altkey, superkey };
+		for (i = 0; i < sizeof(mods) / sizeof(mods[0]); i++) {
+			setmodkey(mods[i], False);
+		}
 	}
 }
 
@@ -249,13 +256,27 @@ buttonrelease(XEvent *e)
 
 	if (ev->x < 0 || ev->y < 0) {
 		unpress(NULL, mod);
-	} else if ((k = findkey(ev->x, ev->y))) {
-		if (k->modifier == mod)
-			unpress(k, 0);
-		else if (k->modifier)
-			unpress(k, k->modifier);
-		else
-			unpress(k, mod);
+	} else {
+		Key *k = NULL;
+		if (ispressingkeysym) {
+			for (i = 0; i < numkeys; i++) {
+				if (keys[i].keysym == ispressingkeysym) {
+					k = &keys[i];
+					break;
+				}
+			}
+		} else {
+			k = findkey(ev->x, ev->y);
+		}
+
+		if (k) {
+			if (k->modifier == mod)
+				unpress(k, 0);
+			else if (k->modifier)
+				unpress(k, k->modifier);
+			else
+				unpress(k, mod);
+		}
 	}
 }
 
@@ -497,6 +518,25 @@ press(Key *k, KeySym buttonmod)
 	drawkey(k, True);
 }
 
+void
+setmodkey(Key *k, Bool set)
+{
+	if (!k || (set == k->pressed)) return;
+
+	if (set)
+		printdbg("Pressing %d\n", XKeysymToString(k->keysym));
+	else
+		printdbg("Unpressing %d\n", XKeysymToString(k->keysym));
+
+	k->pressed = set;
+	k->highlighted = set;
+	if (set)
+		simulate_keypress(k->keysym);
+	else
+		simulate_keyrelease(k->keysym);
+	drawkey(k, True);
+}
+
 int
 tmp_remap(KeySym keysym)
 {
@@ -613,10 +653,10 @@ unpress(Key *k, KeySym buttonmod)
 		}
 	}
 
-	if ((pressbegin.tv_sec || pressbegin.tv_usec) && (enableoverlays || pressonrelease) && ispressingkeysym) {
-		printdbg("Delayed simulation of press after release: %ld\n", ispressingkeysym);
+	if ((pressbegin.tv_sec || pressbegin.tv_usec) && (enableoverlays || pressonrelease) && k && !IsModifierKey(k) && k->keysym == ispressingkeysym) {
+		printdbg("Delayed simulation of press after release: %ld\n", k->keysym);
 		/* simulate the press event, as we postponed it earlier in press() */
-		simulate_keypress(ispressingkeysym);
+		simulate_keypress(k->keysym);
 		pressbegin.tv_sec = 0;
 		pressbegin.tv_usec = 0;
 	}
