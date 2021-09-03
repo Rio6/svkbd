@@ -21,7 +21,7 @@ options:
 	@echo "LDFLAGS  = ${SVKBD_LDFLAGS}"
 	@echo "CC       = ${CC}"
 
-config.h:
+config.h: config.def.h
 	cp config.def.h $@
 
 svkbd.o: config.h layout.${LAYOUT}.h
@@ -52,11 +52,11 @@ dist:
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
-	cp -f ${NAME}-${LAYOUT} ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}-${LAYOUT}
-	mkdir -p "${DESTDIR}${MANPREFIX}/man1"
-	sed "s/VERSION/${VERSION}/g" < ${MAN1} > ${DESTDIR}${MANPREFIX}/man1/${MAN1}
-	chmod 644 ${DESTDIR}${MANPREFIX}/man1/${MAN1}
+	cp -f ${NAME}-${LAYOUT} ${DESTDIR}${PREFIX}/bin/${NAME}
+	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}
+	# mkdir -p "${DESTDIR}${MANPREFIX}/man1"
+	# sed "s/VERSION/${VERSION}/g" < ${MAN1} > ${DESTDIR}${MANPREFIX}/man1/${MAN1}
+	# chmod 644 ${DESTDIR}${MANPREFIX}/man1/${MAN1}
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/${NAME}-??
