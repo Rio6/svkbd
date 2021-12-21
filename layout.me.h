@@ -2,16 +2,16 @@
 
 static Key keys_en[KEYS] = {
     { "↹", 0, XK_Tab, 1 },
+    { "Esc", 0, XK_Escape, 1 },
     { "←", 0, XK_Left, 1 },
     { "↓", 0, XK_Down, 1 },
     { "↑", 0, XK_Up, 1 },
     { "→", 0, XK_Right, 1 },
-    { "In", 0, XK_Insert, 1},
     { "-", 0, XK_minus, 1},
     { "=", 0, XK_equal, 1},
     { "[", 0, XK_bracketleft, 1 },
     { "]", 0, XK_bracketright, 1 },
-    { "Esc", 0, XK_Escape, 1 },
+    { "⨯", 0, XK_Break, 1},
 
     { 0 },
 
