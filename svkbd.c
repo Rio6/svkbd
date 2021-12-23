@@ -193,9 +193,9 @@ motionnotify(XEvent *e)
 	int dy = keys[gainedfocus].y - keys[lostfocus].y;
 
 	if (dx*dx < dy*dy && dy < 0) {
-		setmodkey(shiftkey, True);
-	} else if (dx*dx < dy*dy && dy > 0) {
 		setmodkey(ctrlkey, True);
+	} else if (dx*dx < dy*dy && dy > 0) {
+		setmodkey(shiftkey, True);
 	} else if (dx*dx > dy*dy && dx < 0) {
 		setmodkey(superkey, True);
 	} else if (dx*dx > dy*dy && dx > 0) {
